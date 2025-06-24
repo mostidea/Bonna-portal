@@ -41,8 +41,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var jsonString = await response.Content.ReadAsStringAsync();
 
-      var result = JsonSerializer.Deserialize<StockResponseDto>(jsonString,
-          new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+      var result = JsonSerializer.Deserialize<StockResponseDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
       return Ok(result);
     }
