@@ -5,8 +5,10 @@
     public bool Error { get; set; }
     public string Token { get; set; }
     public BonnaUser User { get; set; }
+    public List<ErpData> ErpData { get; set; }
     public RolesData RolesData { get; set; }
   }
+
   public class BonnaUser
   {
     public string _id { get; set; }
@@ -23,6 +25,89 @@
     public DateTime UpdatedAt { get; set; }
     public int __v { get; set; }
   }
+
+  public class ErpData
+  {
+    public string CLIENT { get; set; }
+    public string COMPANY { get; set; }
+    public string USERNAME { get; set; }
+    public string SALDEPT { get; set; }
+    public string EMAIL { get; set; }
+    public string KPOISCUSTOMER { get; set; }
+    public string KPOISNATION { get; set; }
+    public string KPOAUTHORITY { get; set; }
+    public string BPHONE { get; set; }
+    public string BMOBILE { get; set; }
+    public string KPOCUSTOMER { get; set; }
+    public string KPOCURRENCY { get; set; }
+    public string CCUSTNAME { get; set; }
+    public string KPOCUSADRNUM { get; set; }
+    public string KPOCOMMISSIONER { get; set; }
+    public string KPOCOMADRNUM { get; set; }
+    public List<TmpLoginDetailCus> TMPLOGINDETAILCUS { get; set; }
+    public List<TmpCusAdr> TMPCUSADR { get; set; }
+  }
+
+  public class TmpLoginDetailCus
+  {
+    public string ISCUSTORVEND { get; set; }
+    public string CUSTOMER { get; set; }
+    public string NAME { get; set; }
+    public string ADDRESS { get; set; }
+    public string CITY { get; set; }
+    public string TELNUM { get; set; }
+    public string TLXNUM { get; set; }
+    public string CUSTCOND { get; set; }
+    public string PRICELIST { get; set; }
+    public string PAYMCOND { get; set; }
+    public string SALDEPT { get; set; }
+    public string KPORAPORBOLGE { get; set; }
+    public string CUSTGRP { get; set; }
+    public string REGION { get; set; }
+    public string COUNTRY { get; set; }
+    public string CURRENCY { get; set; }
+    public string DISCOUNT1 { get; set; }
+    public string DISCOUNT2 { get; set; }
+    public List<TmpCust> TMPCUST { get; set; }
+    public List<TmpDocType> TMPDOCTYPE { get; set; }
+    public List<TmpVOption> TMPVOPTION { get; set; }
+  }
+
+  public class TmpCust
+  {
+    public string LEADCODE { get; set; }
+    public string LEADNAME { get; set; }
+  }
+
+  public class TmpDocType
+  {
+    public string DOCTYPE { get; set; }
+    public string STEXT { get; set; }
+    public string KPOKDVORAN { get; set; }
+    public string STATUS { get; set; }
+    public string KARGOBEDELI { get; set; }
+  }
+
+  public class TmpVOption
+  {
+    public string VALUE { get; set; }
+    public string STEXT { get; set; }
+    public string QCODE { get; set; }
+  }
+
+  public class TmpCusAdr
+  {
+    public string CUSTOMER { get; set; }
+    public string ADRNUM { get; set; }
+    public string ADDRESSLINE1 { get; set; }
+    public List<string> TAXDEPT { get; set; }
+    public List<string> CITY { get; set; }
+    public string ZIPSTREET { get; set; }
+    public string COUNTRY { get; set; }
+    public string CURRENCY { get; set; }
+    public List<string> TLXNUM { get; set; }
+  }
+
   public class RolesData
   {
     public PermissionRoles PermissionRoles { get; set; }

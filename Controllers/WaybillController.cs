@@ -16,8 +16,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       _httpClientFactory = httpClientFactory;
     }
 
-
-
     [HttpGet("GetOrders")]
     public async Task<IActionResult> GetOrders([FromHeader(Name = "Authorization")] string authorizationHeader)
     {
@@ -54,7 +52,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         return StatusCode(500, $"Sunucu hatası: {ex.Message}");
       }
     }
-
 
   }
 }

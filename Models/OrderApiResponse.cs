@@ -52,7 +52,6 @@
     public string _id { get; set; }
   }
 
-
   public class OrderDetailResponse
   {
     public bool Error { get; set; }
@@ -101,8 +100,4 @@
     public DateTime UpdatedAt { get; set; }
     public int __v { get; set; }
   }
-
-
-
-
 }
