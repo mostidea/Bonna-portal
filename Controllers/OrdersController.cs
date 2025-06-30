@@ -1,7 +1,7 @@
-﻿using Bonna_Portal_Bridge_Api.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using Bonna_Portal_Bridge_Api.Models;
+using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -83,6 +83,5 @@ public class OrdersController : ControllerBase
       return StatusCode(500, $"Hata oluştu: {ex.Message}");
     }
   }
-
 
 }

@@ -38,6 +38,5 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       return Ok(result);
     }
 
-
   }
 }
