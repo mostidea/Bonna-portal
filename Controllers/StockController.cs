@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
-using System.Text.Json;
-using Bonna_Portal_Bridge_Api.Models;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Bonna_Portal_Bridge_Api.Controllers
 {
@@ -16,131 +16,37 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       _httpClientFactory = httpClientFactory;
     }
 
-    [HttpGet("GetStocks")]
-    public async Task<ActionResult<StockResponseDto>> GetStocks([FromHeader(Name = "Authorization")] string authorizationHeader, [FromQuery] int page = 1, [FromQuery] int limit = 10000) // varsayılan limit yüksek ama isteyen daha küçük de gönderebilir
+    public class PriceListRequestDto
     {
-      if (string.IsNullOrWhiteSpace(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
-        return BadRequest("Authorization header eksik veya geçersiz.");
-
-      var token = authorizationHeader.Replace("Bearer ", "").Trim();
-
-      var client = _httpClientFactory.CreateClient();
-
-      client.BaseAddress = new Uri("https://api-portal.bonna.com.tr/");
-      client.DefaultRequestHeaders.Accept.Clear();
-      client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-      var response = await client.GetAsync($"api/stock?page={page}&limit={limit}");
-
-      if (!response.IsSuccessStatusCode)
-      {
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return StatusCode((int)response.StatusCode, errorContent);
-      }
-
-      var jsonString = await response.Content.ReadAsStringAsync();
-
-      var result = JsonSerializer.Deserialize<StockResponseDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-      return Ok(result);
+      public string PRICELIST { get; set; }
     }
 
-    //[HttpGet("GetStocks")]
-    //public async Task<ActionResult<StockResponseDto>> GetStocks([FromHeader(Name = "Authorization")] string authorizationHeader)
-    //{
-    //  if (string.IsNullOrWhiteSpace(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
-    //    return BadRequest("Authorization header eksik veya geçersiz.");
-
-    //  var token = authorizationHeader.Replace("Bearer ", "").Trim();
-
-    //  // SAYFALAMA DEĞERLERİ SABİT (sadece burası sabit olacak)
-    //  int page = 1;
-    //  int limit = 5;
-
-    //  var client = _httpClientFactory.CreateClient();
-
-    //  client.BaseAddress = new Uri("https://api-portal.bonna.com.tr/");
-    //  client.DefaultRequestHeaders.Accept.Clear();
-    //  client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    //  client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-    //  var response = await client.GetAsync($"api/stock?page={page}&limit={limit}");
-
-    //  if (!response.IsSuccessStatusCode)
-    //  {
-    //    var errorContent = await response.Content.ReadAsStringAsync();
-    //    return StatusCode((int)response.StatusCode, errorContent);
-    //  }
-
-    //  var jsonString = await response.Content.ReadAsStringAsync();
-
-    //  var result = JsonSerializer.Deserialize<StockResponseDto>(jsonString,
-    //      new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-    //  return Ok(result);
-    //}
-
-
-    //[HttpGet("GetStocks")]
-    //public async Task<ActionResult<StockResponseDto>> GetStocks([FromHeader(Name = "Authorization")] string authorizationHeader)
-    //{
-    //  if (string.IsNullOrWhiteSpace(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
-    //    return BadRequest("Authorization header eksik veya geçersiz.");
-
-    //  var token = authorizationHeader.Replace("Bearer ", "").Trim();
-
-    //  var client = _httpClientFactory.CreateClient();
-
-    //  client.BaseAddress = new Uri("https://api-portal.bonna.com.tr/");
-    //  client.DefaultRequestHeaders.Accept.Clear();
-    //  client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    //  client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-    //  var response = await client.GetAsync("api/stock/");
-
-    //  if (!response.IsSuccessStatusCode)
-    //  {
-    //    var errorContent = await response.Content.ReadAsStringAsync();
-    //    return StatusCode((int)response.StatusCode, errorContent);
-    //  }
-
-    //  var jsonString = await response.Content.ReadAsStringAsync();
-
-    //  var result = JsonSerializer.Deserialize<StockResponseDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-    //  return Ok(result);
-    //}
-
-    [HttpGet("GetStockDetail/{id}")]
-    public async Task<ActionResult<StockDetailResponseDto>> GetStockDetail(string id, [FromHeader(Name = "Authorization")] string authorizationHeader)
+    [HttpPost("StockAll")]
+    public async Task<IActionResult> StockAll([FromBody] PriceListRequestDto request)
     {
-      if (string.IsNullOrWhiteSpace(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
-        return BadRequest("Authorization header eksik veya geçersiz.");
+      if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        return Unauthorized("Authorization header eksik.");
 
-      var token = authorizationHeader.Replace("Bearer ", "").Trim();
+      var token = authorizationHeader.ToString().Replace("Bearer ", "").Replace("bearer ", "", StringComparison.OrdinalIgnoreCase);
+      if (string.IsNullOrEmpty(token))
+        return Unauthorized("Token geçersiz.");
 
       var client = _httpClientFactory.CreateClient();
-
       client.BaseAddress = new Uri("https://api-portal.bonna.com.tr/");
-      client.DefaultRequestHeaders.Accept.Clear();
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-      var response = await client.GetAsync($"api/stock/{id}");
+      var json = JsonConvert.SerializeObject(request);
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var response = await client.PostAsync("api/pricelist/", content);
+
+      var responseBody = await response.Content.ReadAsStringAsync();
 
       if (!response.IsSuccessStatusCode)
-      {
-        var errorContent = await response.Content.ReadAsStringAsync();
-        return StatusCode((int)response.StatusCode, errorContent);
-      }
+        return StatusCode((int)response.StatusCode, responseBody);
 
-      var jsonString = await response.Content.ReadAsStringAsync();
-
-      var result = JsonSerializer.Deserialize<StockDetailResponseDto>(jsonString,
-          new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-      return Ok(result);
+      return Content(responseBody, "application/json");
     }
 
   }
