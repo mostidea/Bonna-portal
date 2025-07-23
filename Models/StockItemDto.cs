@@ -5,6 +5,25 @@
     public string PRICELIST { get; set; }
   }
 
+  public class PriceListSearchRequestDto
+  {
+    public string PRICELIST { get; set; } = null!;
+    public ProductSearch productSearch { get; set; } = new();
+    public string status { get; set; } = "boolean";
+    public string KPOISCUSTOMER { get; set; } = null!;
+  }
+
+  public class ProductSearch
+  {
+    public string materialName { get; set; } = "materialName";
+    public string price { get; set; } = "";
+    public string priceOperator { get; set; } = "";
+    public string stock { get; set; } = "";
+    public string stockOperator { get; set; } = "";
+    public string reservation { get; set; } = "";
+    public string reservationOperator { get; set; } = "";
+    public string productType { get; set; } = "";
+  }
   public class PriceListResponseDto
   {
     public int status { get; set; }
