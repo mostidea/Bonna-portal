@@ -11,6 +11,7 @@
     public string message { get; set; }
     public List<PriceListItemDto> result { get; set; }
   }
+
   public class PriceListItemDto
   {
     public string materialcode { get; set; }

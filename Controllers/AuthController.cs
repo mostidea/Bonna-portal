@@ -18,10 +18,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       _BonnaApiBaseUrl = configuration["ExternalServices:BonnaApiBaseUrl"];
     }
 
-    
-
-    [HttpPost("LoginToBonna")]
-    public async Task<IActionResult> LoginToBonna([FromQuery] LoginRequestDto model)
+    [HttpPost("Login")]
+    public async Task<IActionResult> Login([FromQuery] LoginRequestDto model)
     {
       var client = _HttpClientFactory.CreateClient();
       var requestJson = JsonConvert.SerializeObject(new { username = model.Username, password = model.Password });
