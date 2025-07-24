@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -19,11 +20,10 @@ public class OrdersController : ControllerBase
   [HttpPost("GetOrderList")]
   public async Task<IActionResult> GetOrderList()
   {
-    // Authorization kontrolü
     if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
       return Unauthorized("Authorization header eksik.");
 
-    var token = authorizationHeader.ToString().Replace("Bearer ", "").Replace("bearer ", "", StringComparison.OrdinalIgnoreCase);
+    var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
     if (string.IsNullOrEmpty(token))
       return Unauthorized("Token geçersiz.");
 
@@ -31,7 +31,6 @@ public class OrdersController : ControllerBase
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-    // 🔒 Sabit body
     var requestBody = new
     {
       language = "T",
@@ -46,13 +45,13 @@ public class OrdersController : ControllerBase
 
     var url = $"{_bonnaApiBaseUrl}/api/orderERP";
     var response = await client.PostAsync(url, content);
-
     var responseBody = await response.Content.ReadAsStringAsync();
 
     if (!response.IsSuccessStatusCode)
       return StatusCode((int)response.StatusCode, responseBody);
 
-    return Content(responseBody, "application/json");
+    var result = JsonConvert.DeserializeObject<GetOrderListResponse>(responseBody);
+    return Ok(result);
   }
 
 }

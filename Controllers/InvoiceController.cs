@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -64,11 +65,13 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       var url = $"{_configuration["ExternalServices:BonnaApiBaseUrl"]}/api/invoiceERP";
       var response = await client.PostAsync(url, content);
       var responseBody = await response.Content.ReadAsStringAsync();
+      var result = JsonConvert.DeserializeObject<InvoiceResponseDto>(responseBody);
 
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
       return Content(responseBody, "application/json");
     }
+
   }
 }
