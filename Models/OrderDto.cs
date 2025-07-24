@@ -42,4 +42,10 @@
     public string KALITE { get; set; }
   }
 
+  public class GetOrderItemsRequestDto
+  {
+    public string DOCTYPE { get; set; }
+    public string DOCNUM { get; set; }
+  }
+
 }
