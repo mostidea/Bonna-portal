@@ -19,8 +19,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       _configuration = configuration;
     }
 
-    [HttpPost("GetInvoices")]
-    public async Task<IActionResult> GetInvoices()
+    [HttpPost("List")]
+    public async Task<IActionResult> List()
     {
       if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
         return Unauthorized("Authorization header eksik.");

@@ -12,6 +12,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
     {
       _httpClientFactory = httpClientFactory;
     }
-       
+
   }
 }

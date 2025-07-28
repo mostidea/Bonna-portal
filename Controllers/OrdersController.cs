@@ -17,8 +17,8 @@ public class OrdersController : ControllerBase
     _bonnaApiBaseUrl = configuration["ExternalServices:BonnaApiBaseUrl"];
   }
 
-  [HttpPost("GetOrderList")]
-  public async Task<IActionResult> GetOrderList()
+  [HttpPost("List")]
+  public async Task<IActionResult> List()
   {
     if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
       return Unauthorized("Authorization header eksik.");
@@ -54,8 +54,8 @@ public class OrdersController : ControllerBase
     return Ok(result);
   }
 
-  [HttpPost("GetOrderItems")]
-  public async Task<IActionResult> GetOrderItems([FromBody] GetOrderItemsRequestDto dto)
+  [HttpPost("Items")]
+  public async Task<IActionResult> Items([FromBody] GetOrderItemsRequestDto dto)
   {
     if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
       return Unauthorized("Authorization header eksik.");

@@ -119,6 +119,7 @@
     public DateTime UpdatedAt { get; set; }
     public int __v { get; set; }
   }
+
   public class PermissionRoles
   {
     public Permission dashboard { get; set; }
@@ -141,14 +142,17 @@
     public Permission download { get; set; }
     public Permission qt02 { get; set; }
   }
+
   public class Permission
   {
     public bool Write { get; set; }
     public bool Read { get; set; }
   }
+
   public class LoginRequestDto
   {
     public string Username { get; set; }
     public string Password { get; set; }
   }
+
 }
