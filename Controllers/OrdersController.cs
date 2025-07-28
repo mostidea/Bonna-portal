@@ -4,95 +4,98 @@ using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-[Route("api/[controller]")]
-[ApiController]
-public class OrdersController : ControllerBase
+namespace Bonna_Portal_Bridge_Api.Controllers
 {
-  private readonly IHttpClientFactory _httpClientFactory;
-  private readonly string _bonnaApiBaseUrl;
-
-  public OrdersController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+  [Route("api/[controller]")]
+  [ApiController]
+  public class OrdersController : ControllerBase
   {
-    _httpClientFactory = httpClientFactory;
-    _bonnaApiBaseUrl = configuration["ExternalServices:BonnaApiBaseUrl"];
-  }
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string _bonnaApiBaseUrl;
 
-  [HttpPost("List")]
-  public async Task<IActionResult> List()
-  {
-    if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
-      return Unauthorized("Authorization header eksik.");
-
-    var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
-    if (string.IsNullOrEmpty(token))
-      return Unauthorized("Token geçersiz.");
-
-    var client = _httpClientFactory.CreateClient();
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-    var requestBody = new
+    public OrdersController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
-      language = "T",
-      info = new
-      {
-        KPOCUSTOMER = "M00000653"
-      }
-    };
+      _httpClientFactory = httpClientFactory;
+      _bonnaApiBaseUrl = configuration["ExternalServices:BonnaApiBaseUrl"];
+    }
 
-    var json = JsonConvert.SerializeObject(requestBody);
-    var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-    var url = $"{_bonnaApiBaseUrl}/api/orderERP";
-    var response = await client.PostAsync(url, content);
-    var responseBody = await response.Content.ReadAsStringAsync();
-
-    if (!response.IsSuccessStatusCode)
-      return StatusCode((int)response.StatusCode, responseBody);
-
-    var result = JsonConvert.DeserializeObject<GetOrderListResponse>(responseBody);
-    return Ok(result);
-  }
-
-  [HttpPost("Items")]
-  public async Task<IActionResult> Items([FromBody] GetOrderItemsRequestDto dto)
-  {
-    if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
-      return Unauthorized("Authorization header eksik.");
-
-    var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
-    if (string.IsNullOrEmpty(token))
-      return Unauthorized("Token geçersiz.");
-
-    var client = _httpClientFactory.CreateClient();
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-    var requestBody = new
+    [HttpPost("List")]
+    public async Task<IActionResult> List()
     {
-      language = "T",
-      info = new
+      if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        return Unauthorized("Authorization header eksik.");
+
+      var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
+      if (string.IsNullOrEmpty(token))
+        return Unauthorized("Token geçersiz.");
+
+      var client = _httpClientFactory.CreateClient();
+      client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var requestBody = new
       {
-        type = "orderItems",
-        orderData = new
+        language = "T",
+        info = new
         {
-          DOCTYPE = dto.DOCTYPE,
-          DOCNUM = dto.DOCNUM
+          KPOCUSTOMER = "M00000653"
         }
-      }
-    };
+      };
 
-    var json = JsonConvert.SerializeObject(requestBody);
-    var content = new StringContent(json, Encoding.UTF8, "application/json");
+      var json = JsonConvert.SerializeObject(requestBody);
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-    var url = $"{_bonnaApiBaseUrl}/api/oitemsERP";
-    var response = await client.PostAsync(url, content);
-    var responseBody = await response.Content.ReadAsStringAsync();
+      var url = $"{_bonnaApiBaseUrl}/api/orderERP";
+      var response = await client.PostAsync(url, content);
+      var responseBody = await response.Content.ReadAsStringAsync();
 
-    if (!response.IsSuccessStatusCode)
-      return StatusCode((int)response.StatusCode, responseBody);
+      if (!response.IsSuccessStatusCode)
+        return StatusCode((int)response.StatusCode, responseBody);
 
-    return Content(responseBody, "application/json");
+      var result = JsonConvert.DeserializeObject<GetOrderListResponse>(responseBody);
+      return Ok(result);
+    }
+
+    [HttpPost("Items")]
+    public async Task<IActionResult> Items([FromBody] GetOrderItemsRequestDto dto)
+    {
+      if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        return Unauthorized("Authorization header eksik.");
+
+      var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
+      if (string.IsNullOrEmpty(token))
+        return Unauthorized("Token geçersiz.");
+
+      var client = _httpClientFactory.CreateClient();
+      client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var requestBody = new
+      {
+        language = "T",
+        info = new
+        {
+          type = "orderItems",
+          orderData = new
+          {
+            DOCTYPE = dto.DOCTYPE,
+            DOCNUM = dto.DOCNUM
+          }
+        }
+      };
+
+      var json = JsonConvert.SerializeObject(requestBody);
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var url = $"{_bonnaApiBaseUrl}/api/oitemsERP";
+      var response = await client.PostAsync(url, content);
+      var responseBody = await response.Content.ReadAsStringAsync();
+
+      if (!response.IsSuccessStatusCode)
+        return StatusCode((int)response.StatusCode, responseBody);
+
+      return Content(responseBody, "application/json");
+    }
+
   }
-
 }
