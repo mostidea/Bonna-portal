@@ -35,9 +35,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var json = JsonConvert.SerializeObject(request);
       var content = new StringContent(json, Encoding.UTF8, "application/json");
-
       var response = await client.PostAsync($"{_bonnaApiBaseUrl}/api/pricelist", content);
-
       var responseBody = await response.Content.ReadAsStringAsync();
 
       if (!response.IsSuccessStatusCode)
