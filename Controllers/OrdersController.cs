@@ -2,6 +2,7 @@
 using System.Text;
 using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 
 namespace Bonna_Portal_Bridge_Api.Controllers
@@ -12,15 +13,17 @@ namespace Bonna_Portal_Bridge_Api.Controllers
   {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _bonnaApiBaseUrl;
+    private readonly IMemoryCache _memoryCache;
 
-    public OrdersController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public OrdersController(IHttpClientFactory httpClientFactory, IConfiguration configuration, IMemoryCache memoryCache)
     {
       _httpClientFactory = httpClientFactory;
       _bonnaApiBaseUrl = configuration["ExternalServices:BonnaApiBaseUrl"];
+      _memoryCache = memoryCache;
     }
 
     [HttpPost("List")]
-    public async Task<IActionResult> List()
+    public async Task<IActionResult> List([FromQuery] string userId)
     {
       if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
         return Unauthorized("Authorization header eksik.");
@@ -28,6 +31,15 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
       if (string.IsNullOrEmpty(token))
         return Unauthorized("Token geçersiz.");
+
+      var cacheKey = $"login_{userId}";
+      if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
+        return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
+
+      // 💡 ErpData bir liste, ilk öğeden KPOCUSTOMER alınmalı
+      var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
+      if (string.IsNullOrEmpty(kpocustomer))
+        return BadRequest("KPOCUSTOMER bilgisi bulunamadı.");
 
       var client = _httpClientFactory.CreateClient();
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -38,7 +50,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         language = "T",
         info = new
         {
-          KPOCUSTOMER = "M00000653"
+          KPOCUSTOMER = kpocustomer
         }
       };
 
