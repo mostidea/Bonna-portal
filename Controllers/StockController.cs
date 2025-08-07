@@ -70,8 +70,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-
-
       var sabitBody = new
       {
         PRICELIST = "U2",

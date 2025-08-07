@@ -4,7 +4,8 @@
   {
     public bool error { get; set; }
     public string message { get; set; }
-    public List<InvoiceData> body { get; set; } = new();
+    public List<InvoiceData> data { get; set; } = new();
+
   }
 
   public class InvoiceData

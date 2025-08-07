@@ -46,8 +46,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         {
           userData = new
           {
-            //KPOCUSTOMER = "M00000653"
-            KPOCUSTOMER = kpocustomer
+            KPOCUSTOMER = "M00000653"
+            //KPOCUSTOMER = kpocustomer
           },
           search = new
           {
