@@ -50,6 +50,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         language = "T",
         info = new
         {
+          //KPOCUSTOMER = "M00000653"
           KPOCUSTOMER = kpocustomer
         }
       };
@@ -65,7 +66,23 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         return StatusCode((int)response.StatusCode, responseBody);
 
       var result = JsonConvert.DeserializeObject<GetOrderListResponse>(responseBody);
-      return Ok(result);
+
+      var filteredList = result.data.Select(order => new
+      {
+        doctype = order.DOCTYPE,
+        docnum = order.DOCNUM,
+        belgeno = order.BELGENO,
+        musteri = order.MUSTERI,
+        tarih = DateTime.TryParse(order.TARIH, out var parsedDate)
+        ? parsedDate.ToString("dd.MM.yyyy")
+        : order.TARIH,
+        durum = order.DURUM,
+        belgetip = order.BELGETIP,
+        geneltoplam = order.GENELTOPLAM
+      }).ToList();
+
+      return Ok(filteredList);
+
     }
 
     [HttpPost("Items")]

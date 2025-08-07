@@ -43,8 +43,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var cacheKey = $"login_{result.User._id}";
       _memoryCache.Set(cacheKey, new { User = result.User, ErpData = result.ErpData, RolesData = result.RolesData }, TimeSpan.FromDays(365));
-      //return Ok(new { token = result.Token, userId = result.User._id });
-      return Ok(result);
+      return Ok(new { token = result.Token, userId = result.User._id });
+      //return Ok(result);
     }
 
     [HttpGet("GetCachedLoginData/{userId}")]

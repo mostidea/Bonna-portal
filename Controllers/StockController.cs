@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using Bonna_Portal_Bridge_Api.Models;
+﻿using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace Bonna_Portal_Bridge_Api.Controllers
 {
@@ -12,11 +13,13 @@ namespace Bonna_Portal_Bridge_Api.Controllers
   {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _bonnaApiBaseUrl;
+    private readonly IMemoryCache _memoryCache;
 
-    public StockController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public StockController(IHttpClientFactory httpClientFactory, IConfiguration configuration, IMemoryCache memoryCache)
     {
       _httpClientFactory = httpClientFactory;
       _bonnaApiBaseUrl = configuration["ExternalServices:BonnaApiBaseUrl"];
+      _memoryCache = memoryCache;
     }
 
     [HttpPost("List")]
@@ -45,7 +48,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
     }
 
     [HttpPost("Search")]
-    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] string KPOISCUSTOMER)
+    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] string KPOISCUSTOMER, string userId)
     {
       if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
         return Unauthorized("Authorization header eksik.");
@@ -54,9 +57,20 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (string.IsNullOrEmpty(token))
         return Unauthorized("Token geçersiz.");
 
+      var cacheKey = $"login_{userId}";
+      if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
+        return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
+
+      // 💡 ErpData bir liste, ilk öğeden KPOCUSTOMER alınmalı
+      var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
+      if (string.IsNullOrEmpty(kpocustomer))
+        return BadRequest("KPOCUSTOMER bilgisi bulunamadı.");
+
       var client = _httpClientFactory.CreateClient();
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+
 
       var sabitBody = new
       {
