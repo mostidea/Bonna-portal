@@ -69,6 +69,20 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var filteredList = result.data.Select(order => new
       {
+        indirim1 = order.INDIRIM1,
+        indirim2 = order.INDIRIM2,
+        indirim3 = order.INDIRIM3,
+        kdvsiztoplam = order.GENELTOPLAM - order.KDVTUTARI,
+        geneltoplam = order.GENELTOPLAM,
+        faturatoplam = order.FATURATOPLAMI,
+        toplamindirim = order.TOPLAMINDIRIM,
+        odemetipi = order.ODEMETIPI,
+        fiyatlistesi = order.FIYATLISTESI,
+        kalite = order.KALITE,
+        belgesahip = order.BELGESAHIP,
+        bayi = order.BAYI,
+        adres = order.ADRES,
+        yorum = order.YORUM,
         doctype = order.DOCTYPE,
         docnum = order.DOCNUM,
         belgeno = order.BELGENO,
@@ -78,11 +92,9 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         : order.TARIH,
         durum = order.DURUM,
         belgetip = order.BELGETIP,
-        geneltoplam = order.GENELTOPLAM
       }).ToList();
 
       return Ok(filteredList);
-
     }
 
     [HttpPost("Items")]
@@ -123,7 +135,21 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
-      return Content(responseBody, "application/json");
+      var result = JsonConvert.DeserializeObject<GetOrderItemsResponseDto>(responseBody);
+      var filteredItems = result.data.Select(item => new
+      {
+        item.MIKTAR,
+        item.ACIKMIKTAR,
+        item.REZERVEMIKTAR,
+        item.TOPLAMADA,
+        item.SEVKMIKTAR,
+        item.TOPLAMFIYAT,
+        item.TOTALINDIRIM,
+        item.GECERLILIKTARIHI,
+        item.KDVSIZTOPLAM,
+      }).ToList();
+
+      return Ok(filteredItems);
     }
 
   }

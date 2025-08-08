@@ -8,6 +8,7 @@
 
   public class OrderDto
   {
+    //public float kdvsiztoplam { get; set; }
     public string DOCTYPE { get; set; }
     public string DOCNUM { get; set; }
     public string BELGENO { get; set; }
@@ -35,10 +36,10 @@
     public string INDIRIM1 { get; set; }
     public string INDIRIM2 { get; set; }
     public string INDIRIM3 { get; set; }
-    public string FATURATOPLAMI { get; set; }
+    public float FATURATOPLAMI { get; set; }
     public string TOPLAMINDIRIM { get; set; }
-    public string KDVTUTARI { get; set; }
-    public string GENELTOPLAM { get; set; }
+    public float KDVTUTARI { get; set; }
+    public float GENELTOPLAM { get; set; }
     public string KALITE { get; set; }
   }
 
@@ -48,4 +49,38 @@
     public string DOCNUM { get; set; }
   }
 
+  public class GetOrderItemsResponseDto
+  {
+    public bool error { get; set; }
+    public List<OrderItemDto> data { get; set; }
+  }
+
+  public class OrderItemDto
+  {
+    public string MALZEMEACIKLAMA { get; set; }
+    public string MALZEMEKODU { get; set; }
+    public string BIRIMFIYAT { get; set; }
+    public string NETFIYAT { get; set; }
+    public string BIRIMTOPLAMFIYAT { get; set; }
+    public string TOPLAMFIYAT { get; set; }
+    public string MIKTAR { get; set; }
+    public string PARABIRIMI { get; set; }
+    public string REZERVEMIKTAR { get; set; }
+    public string SEVKMIKTAR { get; set; }
+    public string TOPLAMADA { get; set; }
+    public string ACIKMIKTAR { get; set; }
+    public string TALEPTARIHI { get; set; }
+    public string GECERLILIKTARIHI { get; set; }
+    public string SEVKTARIHI { get; set; }
+    public string EANKOD { get; set; }
+    public string GTIP { get; set; }
+    public string GROSSWEIGHT { get; set; }
+    public string NETWEIGHT { get; set; }
+    public string HACIM { get; set; }
+    public string KUTUICIADET { get; set; }
+    public string PALETADET { get; set; }
+    public string ITEMNUMBER { get; set; }
+    public string TOTALINDIRIM { get; set; }
+    public string KDVSIZTOPLAM { get; set; }
+  }
 }
