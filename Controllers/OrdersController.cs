@@ -69,6 +69,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var filteredList = result.data.Select(order => new
       {
+        sevktarihi = order.FABRIKASEVKTARIHI,
         indirim1 = order.INDIRIM1,
         indirim2 = order.INDIRIM2,
         indirim3 = order.INDIRIM3,
