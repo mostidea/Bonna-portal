@@ -135,18 +135,22 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
+      var cacheKey = $"login_{dto.Userid}";
+      if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
+        return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
+
+      // 💡 ErpData bir liste, ilk öğeden KPOCUSTOMER alınmalı
+      var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
+
       var result = JsonConvert.DeserializeObject<GetOrderItemsResponseDto>(responseBody);
       var filteredItems = result.data.Select(item => new
       {
-        item.MIKTAR,
-        item.ACIKMIKTAR,
-        item.REZERVEMIKTAR,
-        item.TOPLAMADA,
-        item.SEVKMIKTAR,
+        item.MALZEMEACIKLAMA,
+        item.MALZEMEKODU,
+        item.BIRIMFIYAT,
         item.TOPLAMFIYAT,
-        item.TOTALINDIRIM,
-        item.GECERLILIKTARIHI,
-        item.KDVSIZTOPLAM,
+        item.MIKTAR,
+        fiyatlistesi = "U2"
       }).ToList();
 
       return Ok(filteredItems);

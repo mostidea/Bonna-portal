@@ -47,6 +47,7 @@
   {
     public string DOCTYPE { get; set; }
     public string DOCNUM { get; set; }
+    public string Userid { get; set; }
   }
 
   public class GetOrderItemsResponseDto
