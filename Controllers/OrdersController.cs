@@ -73,6 +73,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         indirim2 = order.INDIRIM2,
         indirim3 = order.INDIRIM3,
         kdvsiztoplam = order.GENELTOPLAM - order.KDVTUTARI,
+        kdvtutari = order.KDVTUTARI,
         geneltoplam = order.GENELTOPLAM,
         faturatoplam = order.FATURATOPLAMI,
         toplamindirim = order.TOPLAMINDIRIM,
@@ -87,9 +88,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         docnum = order.DOCNUM,
         belgeno = order.BELGENO,
         musteri = order.MUSTERI,
-        tarih = DateTime.TryParse(order.TARIH, out var parsedDate)
-        ? parsedDate.ToString("dd.MM.yyyy")
-        : order.TARIH,
+        tarih = DateTime.TryParse(order.TARIH, out var parsedDate) ? parsedDate.ToString("dd.MM.yyyy") : order.TARIH,
         durum = order.DURUM,
         belgetip = order.BELGETIP,
       }).ToList();
@@ -135,12 +134,12 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
-      var cacheKey = $"login_{dto.Userid}";
-      if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
-        return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
+      //var cacheKey = $"login_{dto.Userid}";
+      //if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
+      //return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
 
       // 💡 ErpData bir liste, ilk öğeden KPOCUSTOMER alınmalı
-      var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
+      //var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
 
       var result = JsonConvert.DeserializeObject<GetOrderItemsResponseDto>(responseBody);
       var filteredItems = result.data.Select(item => new
