@@ -1,9 +1,9 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using Bonna_Portal_Bridge_Api.Models;
+﻿using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace Bonna_Portal_Bridge_Api.Controllers
 {
@@ -45,13 +45,20 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
+      // Kampanya modülü için newOfferOrderInfo eklendi
       var requestBody = new
       {
         language = "T",
         info = new
         {
           //KPOCUSTOMER = "M00000653"
-          KPOCUSTOMER = kpocustomer
+          KPOCUSTOMER = kpocustomer,
+          newOfferOrderInfo = new
+          {
+            docType = "",
+            quality = "",
+            type = ""
+          }
         }
       };
 

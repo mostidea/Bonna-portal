@@ -1,5 +1,4 @@
-﻿using Bonna_Portal_Bridge_Api.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -23,7 +22,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
     }
 
     [HttpPost("List")]
-    public async Task<IActionResult> List([FromBody] PriceListRequestDto request)
+    public async Task<IActionResult> List()
     {
       if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
         return Unauthorized("Authorization header eksik.");
@@ -35,6 +34,18 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       var client = _httpClientFactory.CreateClient();
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      // Kampanya modülü için newOfferOrderInfo eklendi
+      var request = new
+      {
+        PRICELIST = "U2",
+        newOfferOrderInfo = new
+        {
+          docType = "",   // teklif belge türü (O1-O2-O3)
+          quality = "",   // kalite
+          type = ""
+        }
+      };
 
       var json = JsonConvert.SerializeObject(request);
       var content = new StringContent(json, Encoding.UTF8, "application/json");
