@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -36,7 +37,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
         return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
 
-      // 💡 ErpData bir liste, ilk öğeden KPOCUSTOMER alınmalı
       var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
       if (string.IsNullOrEmpty(kpocustomer))
         return BadRequest("KPOCUSTOMER bilgisi bulunamadı.");
@@ -45,13 +45,11 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-      // Kampanya modülü için newOfferOrderInfo eklendi
       var requestBody = new
       {
         language = "T",
         info = new
         {
-          //KPOCUSTOMER = "M00000653"
           KPOCUSTOMER = kpocustomer,
           newOfferOrderInfo = new
           {
@@ -74,34 +72,78 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var result = JsonConvert.DeserializeObject<GetOrderListResponse>(responseBody);
 
-      var filteredList = result.data.Select(order => new
-      {
-        sevktarihi = order.FABRIKASEVKTARIHI,
-        indirim1 = order.INDIRIM1,
-        indirim2 = order.INDIRIM2,
-        indirim3 = order.INDIRIM3,
-        kdvsiztoplam = order.GENELTOPLAM - order.KDVTUTARI,
-        kdvtutari = order.KDVTUTARI,
-        geneltoplam = order.GENELTOPLAM,
-        faturatoplam = order.FATURATOPLAMI,
-        toplamindirim = order.TOPLAMINDIRIM,
-        odemetipi = order.ODEMETIPI,
-        fiyatlistesi = order.FIYATLISTESI,
-        kalite = order.KALITE,
-        belgesahip = order.BELGESAHIP,
-        bayi = order.BAYI,
-        adres = order.ADRES,
-        yorum = order.YORUM,
-        doctype = order.DOCTYPE,
-        docnum = order.DOCNUM,
-        belgeno = order.BELGENO,
-        musteri = order.MUSTERI,
-        tarih = DateTime.TryParse(order.TARIH, out var parsedDate) ? parsedDate.ToString("dd.MM.yyyy") : order.TARIH,
-        durum = order.DURUM,
-        belgetip = order.BELGETIP,
-      }).ToList();
+      var filteredList = new List<object>(); // ✅ EKLENDİ
 
-      return Ok(filteredList);
+      foreach (var order in result.data) // ✅ EKLENDİ
+      {
+        // ✅ Sipariş detaylarını almak için Items servisine istek
+        var itemsRequestBody = new
+        {
+          language = "T",
+          info = new
+          {
+            type = "orderItems",
+            orderData = new
+            {
+              DOCTYPE = order.DOCTYPE,
+              DOCNUM = order.DOCNUM
+            }
+          }
+        };
+
+        var itemsJson = JsonConvert.SerializeObject(itemsRequestBody);
+        var itemsContent = new StringContent(itemsJson, Encoding.UTF8, "application/json");
+        var itemsUrl = $"{_bonnaApiBaseUrl}/api/oitemsERP";
+
+        var itemsResponse = await client.PostAsync(itemsUrl, itemsContent);
+        var itemsResponseBody = await itemsResponse.Content.ReadAsStringAsync();
+
+        decimal acikMiktarToplam = 0;
+        decimal rezervMiktarToplam = 0;
+        decimal toplamadaMiktarToplam = 0;
+        decimal sevkMiktarToplam = 0;
+        if (itemsResponse.IsSuccessStatusCode)
+        {
+          var itemsResult = JsonConvert.DeserializeObject<GetOrderItemsResponseDto>(itemsResponseBody);
+          acikMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.ACIKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          rezervMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.REZERVEMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          toplamadaMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.TOPLAMADA, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          sevkMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.SEVKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+        }
+
+        filteredList.Add(new
+        {
+          sevktarihi = order.FABRIKASEVKTARIHI,
+          indirim1 = order.INDIRIM1,
+          indirim2 = order.INDIRIM2,
+          indirim3 = order.INDIRIM3,
+          kdvsiztoplam = order.GENELTOPLAM - order.KDVTUTARI,
+          kdvtutari = order.KDVTUTARI,
+          geneltoplam = order.GENELTOPLAM,
+          faturatoplam = order.FATURATOPLAMI,
+          toplamindirim = order.TOPLAMINDIRIM,
+          odemetipi = order.ODEMETIPI,
+          fiyatlistesi = order.FIYATLISTESI,
+          kalite = order.KALITE,
+          belgesahip = order.BELGESAHIP,
+          bayi = order.BAYI,
+          adres = order.ADRES,
+          yorum = order.YORUM,
+          doctype = order.DOCTYPE,
+          docnum = order.DOCNUM,
+          belgeno = order.BELGENO,
+          musteri = order.MUSTERI,
+          tarih = DateTime.TryParse(order.TARIH, out var parsedDate) ? parsedDate.ToString("dd.MM.yyyy") : order.TARIH,
+          durum = order.DURUM,
+          belgetip = order.BELGETIP,
+          acikMiktarToplam,
+          rezervMiktarToplam,
+          toplamadaMiktarToplam,
+          sevkMiktarToplam
+        });
+      }
+
+      return Ok(filteredList); // ✅ foreach sonrası dönülüyor
     }
 
     [HttpPost("Items")]
