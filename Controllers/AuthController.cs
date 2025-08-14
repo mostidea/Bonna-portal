@@ -73,7 +73,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
         return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
 
-      // Token eşleşme kontrolü
       if (cachedData.User == null || cachedData.User.Token == null || !string.Equals(token, cachedData.User.Token.ToString(), StringComparison.Ordinal))
         return Unauthorized("Token doğrulanamadı.");
 
