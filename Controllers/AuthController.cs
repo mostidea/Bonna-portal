@@ -58,6 +58,36 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       return NotFound("Cache'de veri bulunamadı.");
     }
 
+    [HttpGet("GetMyProfile")]
+    public IActionResult GetMyProfile([FromQuery] string userId)
+    {
+      // Token kontrolü
+      if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        return Unauthorized("Authorization header eksik.");
+
+      var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
+      if (string.IsNullOrEmpty(token))
+        return Unauthorized("Token geçersiz.");
+
+      var cacheKey = $"login_{userId}";
+      if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
+        return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
+
+      // Token eşleşme kontrolü
+      if (cachedData.User == null || cachedData.User.Token == null || !string.Equals(token, cachedData.User.Token.ToString(), StringComparison.Ordinal))
+        return Unauthorized("Token doğrulanamadı.");
+
+      var user = cachedData.User;
+      var profile = new
+      {
+        adsoyad = user.Namesurname,
+        email = user.Email,
+        username = user.Username
+      };
+
+      return Ok(profile);
+    }
+
     //[HttpPost("Login")]
     //public async Task<IActionResult> Login([FromQuery] LoginRequestDto model)
     //{

@@ -1,9 +1,9 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using Bonna_Portal_Bridge_Api.Models;
+﻿using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace Bonna_Portal_Bridge_Api.Controllers
 {
@@ -78,7 +78,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
-      //return Content(responseBody, "application/json");
       return Content(responseBody, "application/json");
     }
 
