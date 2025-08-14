@@ -1,8 +1,8 @@
-﻿using System.Text;
-using Bonna_Portal_Bridge_Api.Models;
+﻿using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace Bonna_Portal_Bridge_Api.Controllers
 {
