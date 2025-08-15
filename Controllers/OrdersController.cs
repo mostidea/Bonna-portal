@@ -62,7 +62,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var json = JsonConvert.SerializeObject(requestBody);
       var content = new StringContent(json, Encoding.UTF8, "application/json");
-
       var url = $"{_bonnaApiBaseUrl}/api/orderERP";
       var response = await client.PostAsync(url, content);
       var responseBody = await response.Content.ReadAsStringAsync();
@@ -71,12 +70,10 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         return StatusCode((int)response.StatusCode, responseBody);
 
       var result = JsonConvert.DeserializeObject<GetOrderListResponse>(responseBody);
+      var filteredList = new List<object>();
 
-      var filteredList = new List<object>(); // ✅ EKLENDİ
-
-      foreach (var order in result.data) // ✅ EKLENDİ
+      foreach (var order in result.data)
       {
-        // ✅ Sipariş detaylarını almak için Items servisine istek
         var itemsRequestBody = new
         {
           language = "T",
@@ -94,24 +91,23 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         var itemsJson = JsonConvert.SerializeObject(itemsRequestBody);
         var itemsContent = new StringContent(itemsJson, Encoding.UTF8, "application/json");
         var itemsUrl = $"{_bonnaApiBaseUrl}/api/oitemsERP";
-
         var itemsResponse = await client.PostAsync(itemsUrl, itemsContent);
         var itemsResponseBody = await itemsResponse.Content.ReadAsStringAsync();
 
-        decimal acikMiktarToplam = 0;
-        decimal rezervMiktarToplam = 0;
-        decimal toplamadaMiktarToplam = 0;
-        decimal sevkMiktarToplam = 0;
-        decimal miktarToplam = 0;
+        float acikMiktarToplam = 0;
+        float rezervMiktarToplam = 0;
+        float toplamadaMiktarToplam = 0;
+        float sevkMiktarToplam = 0;
+        float miktarToplam = 0;
 
         if (itemsResponse.IsSuccessStatusCode)
         {
           var itemsResult = JsonConvert.DeserializeObject<GetOrderItemsResponseDto>(itemsResponseBody);
-          acikMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.ACIKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
-          rezervMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.REZERVEMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
-          toplamadaMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.TOPLAMADA, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
-          sevkMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.SEVKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
-          miktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.MIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          acikMiktarToplam = itemsResult.data.Select(i => float.TryParse(i.ACIKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          rezervMiktarToplam = itemsResult.data.Select(i => float.TryParse(i.REZERVEMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          toplamadaMiktarToplam = itemsResult.data.Select(i => float.TryParse(i.TOPLAMADA, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          sevkMiktarToplam = itemsResult.data.Select(i => float.TryParse(i.SEVKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          miktarToplam = itemsResult.data.Select(i => float.TryParse(i.MIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
         }
 
         filteredList.Add(new
@@ -139,15 +135,14 @@ namespace Bonna_Portal_Bridge_Api.Controllers
           tarih = DateTime.TryParse(order.TARIH, out var parsedDate) ? parsedDate.ToString("dd.MM.yyyy") : order.TARIH,
           durum = order.DURUM,
           belgetip = order.BELGETIP,
-          acikMiktarToplam,
-          rezervMiktarToplam,
-          toplamadaMiktarToplam,
-          sevkMiktarToplam,
-          miktarToplam
+          acikMiktarToplam = acikMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
+          rezervMiktarToplam = rezervMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
+          toplamadaMiktarToplam = toplamadaMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
+          sevkMiktarToplam = sevkMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
+          miktarToplam = miktarToplam.ToString("0.0", CultureInfo.InvariantCulture)
         });
       }
-
-      return Ok(filteredList); // ✅ foreach sonrası dönülüyor
+      return Ok(filteredList);
     }
 
     [HttpPost("Items")]
