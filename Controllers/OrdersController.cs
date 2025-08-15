@@ -102,6 +102,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         decimal rezervMiktarToplam = 0;
         decimal toplamadaMiktarToplam = 0;
         decimal sevkMiktarToplam = 0;
+        decimal miktarToplam = 0;
+
         if (itemsResponse.IsSuccessStatusCode)
         {
           var itemsResult = JsonConvert.DeserializeObject<GetOrderItemsResponseDto>(itemsResponseBody);
@@ -109,6 +111,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
           rezervMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.REZERVEMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
           toplamadaMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.TOPLAMADA, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
           sevkMiktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.SEVKMIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
+          miktarToplam = itemsResult.data.Select(i => decimal.TryParse(i.MIKTAR, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : 0).Sum();
         }
 
         filteredList.Add(new
@@ -139,7 +142,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
           acikMiktarToplam,
           rezervMiktarToplam,
           toplamadaMiktarToplam,
-          sevkMiktarToplam
+          sevkMiktarToplam,
+          miktarToplam
         });
       }
 
