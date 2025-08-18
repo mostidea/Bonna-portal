@@ -71,7 +71,12 @@ namespace Bonna_Portal_Bridge_Api.Controllers
                 EANKOD = x.EANKOD,
                 ISUNSRAIL = x.ISUNSRAIL,
                 PALETADET = x.PALETADET,
-                AVAILQTY1 = x.PALETADET,
+                AVAILQTY1 = x.AVAILQTY1,
+                AVAILSTOCK1 = x.AVAILSTOCK1,
+                AVAILQTY2 = x.AVAILQTY2,
+                AVAILSTOCK2 = x.AVAILSTOCK2,
+                priceListDetail = x.priceListDetail,
+                PCS = x.PCS,
               }).ToList()
       };
 
