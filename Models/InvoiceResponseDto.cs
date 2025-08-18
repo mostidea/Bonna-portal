@@ -5,31 +5,30 @@
     public bool error { get; set; }
     public string message { get; set; }
     public List<InvoiceData> data { get; set; } = new();
-
   }
 
   public class InvoiceData
   {
-    public string CUSORDNUM { get; set; }
+    public string DOCTYPE { get; set; }
     public string DOCNUM { get; set; }
-    public string DOCDATE { get; set; }
-    public string DUEDATE { get; set; }
     public string STATUS { get; set; }
-    public string CURR { get; set; }
-    public string AMOUNT { get; set; }
-    public string BTYPE { get; set; }
-    public string SALESGROUP { get; set; }
-    public string DEPARTMENT { get; set; }
-    public string REPRESENTATIVE { get; set; }
-    public string CUSTNAME { get; set; }
-    public string CUSTNUM { get; set; }
-    public string CITY { get; set; }
-    public string COUNTRY { get; set; }
-    public string TAXNUM { get; set; }
-    public string TAXOFFICE { get; set; }
-    public string TEL { get; set; }
-    public string EMAIL { get; set; }
-    public string ADRNUM { get; set; }
-    public string ADRTEXT { get; set; }
+    public string PRINTESNUM { get; set; }
+    public string PRINTEDNUM { get; set; }
+    public string PRINTEFNUM { get; set; }
+    public string TOPLAMAORAN { get; set; }
+    public string MUSTERIADI { get; set; }
+    public string KALITE { get; set; }
+    public string PLATFORM { get; set; }
+    public string SIPAMACI { get; set; }
+    public string SEVKYERI { get; set; }
+    public string SEVKEDILENDEPO { get; set; }
+    public string FIYATLISTESI { get; set; }
+    public string GCURRENCY { get; set; }
+    public List<object> SALITEMS { get; set; }
+    public string SFORDERID { get; set; }
+    public string SSEVKTARIHI { get; set; }
+    public string SOLUSTURMATARIHI { get; set; }
+    public string SSONTERMINTARIHI { get; set; }
+    public string STALEPTARIHI { get; set; }
   }
 }
