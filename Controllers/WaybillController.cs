@@ -79,13 +79,20 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var result = JsonConvert.DeserializeObject<InvoiceResponseDto>(responseBody);
 
+      var user = cachedData.User;
+
+      string hazirlayan = user?.Namesurname ?? "";
+      string iletisim = user?.Email ?? "";
+
       var filteredData = result.data.Select(x => new
       {
+        hazirlayan = hazirlayan,
+        iletisim = iletisim,
         fiyatlistesi = x.FIYATLISTESI,
         solusturmatarihi = x.SOLUSTURMATARIHI,
         sevkyeri = x.SEVKYERI,
         musteriad = x.MUSTERIADI,
-        tarih = x.SSEVKTARIHI,
+        sevktarih = x.SSEVKTARIHI,
         faturano = x.DOCNUM,
         PRINTEDNUM = x.PRINTEDNUM,
         sevkdepo = x.SEVKEDILENDEPO
@@ -128,8 +135,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
           },
           documentType = "0",
           eNumber = "",
-          startDate = "2025-05-05",
-          endDate = "2025-05-08",
+          startDate = "2000-05-05",
+          endDate = "2500-05-08",
           minPrice = "",
           maxPrice = "",
           product = "",
@@ -162,6 +169,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
         var itemObj = item as Newtonsoft.Json.Linq.JObject;
         items.Add(new
         {
+          fiyatlistesi = itemObj?["PRICELIST"]?.ToString(),
           sevkmiktar = itemObj?["SEVKMIKTAR"]?.ToString(),
           urunKodu = itemObj?["URUN"]?.ToString(),
           urunAdi = itemObj?["URUNACIKLAMASI"]?.ToString(),

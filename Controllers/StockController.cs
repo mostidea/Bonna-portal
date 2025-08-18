@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Bonna_Portal_Bridge_Api.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -35,14 +36,13 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-      // Kampanya modülü için newOfferOrderInfo eklendi
       var request = new
       {
         PRICELIST = "U2",
         newOfferOrderInfo = new
         {
-          docType = "",   // teklif belge türü (O1-O2-O3)
-          quality = "",   // kalite
+          docType = "",
+          quality = "",
           type = ""
         }
       };
@@ -55,7 +55,27 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
-      return Content(responseBody, "application/json");
+      var rawResponse = JsonConvert.DeserializeObject<StockListResponse>(responseBody);
+
+      var result = new StockListResponse
+      {
+        error = rawResponse.error,
+        currentPage = rawResponse.currentPage,
+        totalPages = rawResponse.totalPages,
+        totalItems = rawResponse.totalItems,
+        data_length = rawResponse.data_length,
+        result = rawResponse.result
+              .Select(x => new StockDto
+              {
+                MATERIAL = x.MATERIAL,
+                EANKOD = x.EANKOD,
+                ISUNSRAIL = x.ISUNSRAIL,
+                PALETADET = x.PALETADET,
+                AVAILQTY1 = x.PALETADET,
+              }).ToList()
+      };
+
+      return Ok(result);
     }
 
     [HttpPost("Search")]
