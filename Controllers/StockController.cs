@@ -138,7 +138,37 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!response.IsSuccessStatusCode)
         return StatusCode((int)response.StatusCode, responseBody);
 
-      return Content(responseBody, "application/json");
+      var rawResponse = JsonConvert.DeserializeObject<StockListResponse>(responseBody);
+
+      var result = new
+      {
+        error = rawResponse.error,
+        currentPage = rawResponse.currentPage,
+        totalPages = rawResponse.totalPages,
+        totalItems = rawResponse.totalItems,
+        data_length = rawResponse.data_length,
+        result = rawResponse.result.Select(x => new
+        {
+          estext = x.ESTEXT,
+          material = x.MATERIAL,
+          eankod = x.EANKOD,
+          isunsrail = x.ISUNSRAIL,
+          paletadet = x.PALETADET,
+          availqtY1 = x.AVAILQTY1,
+          availstocK1 = x.AVAILSTOCK1,
+          availqtY2 = x.AVAILQTY2,
+          availstocK2 = x.AVAILSTOCK2,
+          pricelist = x.priceListDetail?.PRICELIST,
+          price = x.priceListDetail?.PRICE,
+          currency = x.priceListDetail?.CURRENCY,
+          validfrom = x.priceListDetail?.VALIDFROM,
+          validuntil = x.priceListDetail?.VALIDUNTIL,
+          pcs = x.PCS
+        }).ToList()
+      };
+
+      return Ok(result);
+
     }
 
   }
