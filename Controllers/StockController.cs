@@ -57,34 +57,38 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
       var rawResponse = JsonConvert.DeserializeObject<StockListResponse>(responseBody);
 
-      var result = new StockListResponse
+      var result = new
       {
         error = rawResponse.error,
         currentPage = rawResponse.currentPage,
         totalPages = rawResponse.totalPages,
         totalItems = rawResponse.totalItems,
         data_length = rawResponse.data_length,
-        result = rawResponse.result
-              .Select(x => new StockDto
-              {
-                MATERIAL = x.MATERIAL,
-                EANKOD = x.EANKOD,
-                ISUNSRAIL = x.ISUNSRAIL,
-                PALETADET = x.PALETADET,
-                AVAILQTY1 = x.AVAILQTY1,
-                AVAILSTOCK1 = x.AVAILSTOCK1,
-                AVAILQTY2 = x.AVAILQTY2,
-                AVAILSTOCK2 = x.AVAILSTOCK2,
-                priceListDetail = x.priceListDetail,
-                PCS = x.PCS,
-              }).ToList()
+        result = rawResponse.result.Select(x => new
+        {
+          estext = x.ESTEXT,
+          material = x.MATERIAL,
+          eankod = x.EANKOD,
+          isunsrail = x.ISUNSRAIL,
+          paletadet = x.PALETADET,
+          availqtY1 = x.AVAILQTY1,
+          availstocK1 = x.AVAILSTOCK1,
+          availqtY2 = x.AVAILQTY2,
+          availstocK2 = x.AVAILSTOCK2,
+          pricelist = x.priceListDetail?.PRICELIST,
+          price = x.priceListDetail?.PRICE,
+          currency = x.priceListDetail?.CURRENCY,
+          validfrom = x.priceListDetail?.VALIDFROM,
+          validuntil = x.priceListDetail?.VALIDUNTIL,
+          pcs = x.PCS
+        }).ToList()
       };
 
       return Ok(result);
     }
 
     [HttpPost("Search")]
-    public async Task<IActionResult> Search([FromQuery] string search, [FromQuery] string KPOISCUSTOMER, string userId)
+    public async Task<IActionResult> Search([FromQuery] string search, string userId)
     {
       if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
         return Unauthorized("Authorization header eksik.");
@@ -97,9 +101,8 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
         return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
 
-      // 💡 ErpData bir liste, ilk öğeden KPOCUSTOMER alınmalı
-      var kpocustomer = cachedData.ErpData[0]?.KPOCUSTOMER?.ToString();
-      if (string.IsNullOrEmpty(kpocustomer))
+      var _KPOISCUSTOMER = cachedData.ErpData[0]?.KPOISCUSTOMER?.ToString();
+      if (string.IsNullOrEmpty(_KPOISCUSTOMER))
         return BadRequest("KPOCUSTOMER bilgisi bulunamadı.");
 
       var client = _httpClientFactory.CreateClient();
@@ -121,13 +124,14 @@ namespace Bonna_Portal_Bridge_Api.Controllers
           productType = ""
         },
         status = "boolean",
-        KPOISCUSTOMER = "0000001"
+        //KPOISCUSTOMER = "0000001"
+        KPOISCUSTOMER = _KPOISCUSTOMER
       };
 
       var json = JsonConvert.SerializeObject(sabitBody);
       var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-      var url = $"{_bonnaApiBaseUrl}/api/pricelist/search?search={search}&KPOISCUSTOMER={KPOISCUSTOMER}";
+      var url = $"{_bonnaApiBaseUrl}/api/pricelist/search?search={search}&KPOISCUSTOMER={_KPOISCUSTOMER}";
       var response = await client.PostAsync(url, content);
       var responseBody = await response.Content.ReadAsStringAsync();
 
