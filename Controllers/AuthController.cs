@@ -87,8 +87,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       return Ok(profile);
     }
 
-   
-
     [HttpPost("ForgotPassword")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto model)
     {
@@ -105,7 +103,6 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       // Return the response as received from the external API
       return Content(responseString, "application/json");
     }
-
 
     //[HttpPost("Login")]
     //public async Task<IActionResult> Login([FromQuery] LoginRequestDto model)
