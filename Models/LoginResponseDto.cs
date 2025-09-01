@@ -1,5 +1,16 @@
 ﻿namespace Bonna_Portal_Bridge_Api.Models
 {
+  public class ForgotPasswordResponseDto
+  {
+    public bool error { get; set; }
+    public string message { get; set; }
+    public string result { get; set; }
+  }
+  public class ForgotPasswordRequestDto
+  {
+    public string Email { get; set; }
+  }
+
   public class LoginResponseDto
   {
     public bool Error { get; set; }

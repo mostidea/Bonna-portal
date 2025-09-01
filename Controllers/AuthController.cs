@@ -87,6 +87,26 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       return Ok(profile);
     }
 
+   
+
+    [HttpPost("ForgotPassword")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto model)
+    {
+      if (model == null || string.IsNullOrWhiteSpace(model.Email))
+        return BadRequest("Email adresi gereklidir.");
+
+      var client = _HttpClientFactory.CreateClient();
+      var requestJson = JsonConvert.SerializeObject(new { email = model.Email });
+      var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+
+      var response = await client.PostAsync("https://api-portal.bonna.com.tr/api/forgetpassword", content);
+      var responseString = await response.Content.ReadAsStringAsync();
+
+      // Return the response as received from the external API
+      return Content(responseString, "application/json");
+    }
+
+
     //[HttpPost("Login")]
     //public async Task<IActionResult> Login([FromQuery] LoginRequestDto model)
     //{
