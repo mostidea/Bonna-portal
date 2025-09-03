@@ -135,11 +135,11 @@ namespace Bonna_Portal_Bridge_Api.Controllers
           tarih = DateTime.TryParse(order.TARIH, out var parsedDate) ? parsedDate.ToString("dd.MM.yyyy") : order.TARIH,
           durum = order.DURUM,
           belgetip = order.BELGETIP,
-          acikMiktarToplam = acikMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
-          rezervMiktarToplam = rezervMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
-          toplamadaMiktarToplam = toplamadaMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
-          sevkMiktarToplam = sevkMiktarToplam.ToString("0.0", CultureInfo.InvariantCulture),
-          miktarToplam = miktarToplam.ToString("0.0", CultureInfo.InvariantCulture)
+          acikMiktarToplam = Math.Round(acikMiktarToplam, 1),
+          rezervMiktarToplam = Math.Round(rezervMiktarToplam, 1),
+          toplamadaMiktarToplam = Math.Round(toplamadaMiktarToplam, 1),
+          sevkMiktarToplam = Math.Round(sevkMiktarToplam, 1),
+          miktarToplam = Math.Round(miktarToplam, 1)
         });
       }
       return Ok(filteredList);
