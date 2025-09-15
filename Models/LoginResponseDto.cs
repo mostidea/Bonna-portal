@@ -22,6 +22,7 @@
 
   public class BonnaUser
   {
+    public string Token { get; set; }
     public string _id { get; set; }
     public string Namesurname { get; set; }
     public string Username { get; set; }
