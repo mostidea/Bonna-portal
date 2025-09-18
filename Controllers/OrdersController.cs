@@ -204,5 +204,66 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       return Ok(filteredItems);
     }
 
+    [HttpPost("ExportPdf")]
+    public IActionResult ExportPdf([FromBody] ExportPdfRequestDto dto)
+    {
+      // Yetki kontrolü örneği
+      if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        return Unauthorized("Authorization header eksik.");
+
+      var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
+      if (string.IsNullOrEmpty(token))
+        return Unauthorized("Token geçersiz.");
+
+      // 1. PDF içeriğini oluştur (örnek: teklif/sipariş detaylarını ekle)
+      var sb = new StringBuilder();
+      sb.AppendLine($"Dil: {dto.lang}");
+      sb.AppendLine($"Kullanıcı: {JsonConvert.SerializeObject(dto.userInfo)}");
+      sb.AppendLine($"Tür: {dto.info.type}");
+
+      if (dto.info.type == "offerItems" && dto.info.offerData != null)
+      {
+        sb.AppendLine("Teklif Bilgileri:");
+        sb.AppendLine(JsonConvert.SerializeObject(dto.info.offerData));
+      }
+      if (dto.info.type == "orderItems" && dto.info.orderData != null)
+      {
+        sb.AppendLine("Sipariş Bilgileri:");
+        sb.AppendLine(JsonConvert.SerializeObject(dto.info.orderData));
+      }
+
+      sb.AppendLine("Kalemler:");
+      foreach (var item in dto.offer_order_ItemsData)
+      {
+        sb.AppendLine($"Malzeme: {item.MALZEMEACIKLAMA}, Kod: {item.MALZEMEKODU}, Miktar: {item.MIKTAR}, Fiyat: {item.TOPLAMFIYAT}");
+      }
+
+      var contentBytes = Encoding.UTF8.GetBytes(sb.ToString());
+
+      var base64 = Convert.ToBase64String(contentBytes);
+
+      return Ok(new
+      {
+        success = true,
+        fileBase64 = base64,
+        fileName = "export.pdf" // Gerçek PDF olursa uzantı pdf olmalı
+      });
+    }
+
+    public class ExportPdfRequestDto
+    {
+      public InfoDto info { get; set; }
+      public List<OrderItemDto> offer_order_ItemsData { get; set; }
+      public object userInfo { get; set; }
+      public string lang { get; set; }
+    }
+
+    public class InfoDto
+    {
+      public string type { get; set; } // "offerItems" veya "orderItems"
+      public object offerData { get; set; }
+      public object orderData { get; set; }
+    }
+
   }
 }
