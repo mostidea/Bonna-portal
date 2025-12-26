@@ -205,64 +205,77 @@ namespace Bonna_Portal_Bridge_Api.Controllers
       }
 
       [HttpPost("ExportPdf")]
-      public IActionResult ExportPdf([FromBody] ExportPdfRequestDto dto)
+      public async Task<IActionResult> ExportPdf([FromBody] ExportWaybillPdfRequestDto dto)
       {
-         // Yetki kontrolü örneği
          if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
             return Unauthorized("Authorization header eksik.");
 
          var token = authorizationHeader.ToString().Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
+
          if (string.IsNullOrEmpty(token))
             return Unauthorized("Token geçersiz.");
 
-         // 1. PDF içeriğini oluştur (örnek: teklif/sipariş detaylarını ekle)
-         var sb = new StringBuilder();
-         sb.AppendLine($"Dil: {dto.lang}");
-         sb.AppendLine($"Kullanıcı: {JsonConvert.SerializeObject(dto.userInfo)}");
-         sb.AppendLine($"Tür: {dto.info.type}");
+         var cacheKey = $"login_{dto.UserId}";
+         if (!_memoryCache.TryGetValue(cacheKey, out dynamic cachedData))
+            return Unauthorized("Cache'de kullanıcı oturumu bulunamadı.");
 
-         if (dto.info.type == "offerItems" && dto.info.offerData != null)
+         var erp = cachedData.ErpData[0];
+         var user = cachedData.User;
+
+         List<TmpCusAdr> addresses = erp.TMPCUSADR as List<TmpCusAdr>;
+
+         if (addresses == null || !addresses.Any())
+            return BadRequest("Adres bulunamadı.");
+
+         var address = addresses.First();
+
+         if (address == null)
+            return BadRequest("Adres bulunamadı.");
+
+         var client = _httpClientFactory.CreateClient();
+         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+         var body = new
          {
-            sb.AppendLine("Teklif Bilgileri:");
-            sb.AppendLine(JsonConvert.SerializeObject(dto.info.offerData));
+            info = new
+            {
+               DOCTYPE = "D8",
+               DOCNUM = dto.DOCNUM,
+               MUSTERIADI = erp.CCUSTNAME,
+               SEVKYERI = address.ADDRESSLINE1,
+               FIYATLISTESI = "U2",
+               GCURRENCY = erp.KPOCURRENCY,
+               SOLUSTURMATARIHI = DateTime.UtcNow,
+               SSEVKTARIHI = DateTime.Now.ToString("yyyy-MM-dd"),
+               SEVKEDILENDEPO = "PAZARYERİ",
+               SUBTOTAL = 0.01
+            },
+            userData = erp,
+            userInfo = new
+            {
+               error = false,
+               token,
+               user,
+               erpData = cachedData.ErpData,
+               rolesData = cachedData.RolesData,
+               lang = "tr"
+            }
+         };
+
+         var json = JsonConvert.SerializeObject(body);
+         var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+         var response = await client.PostAsync($"{_bonnaApiBaseUrl}/api/waybillErp/exportpdf", content);
+
+         if (!response.IsSuccessStatusCode)
+         {
+            var err = await response.Content.ReadAsStringAsync();
+            return StatusCode((int)response.StatusCode, err);
          }
-         if (dto.info.type == "orderItems" && dto.info.orderData != null)
-         {
-            sb.AppendLine("Sipariş Bilgileri:");
-            sb.AppendLine(JsonConvert.SerializeObject(dto.info.orderData));
-         }
 
-         sb.AppendLine("Kalemler:");
-         foreach (var item in dto.offer_order_ItemsData)
-         {
-            sb.AppendLine($"Malzeme: {item.MALZEMEACIKLAMA}, Kod: {item.MALZEMEKODU}, Miktar: {item.MIKTAR}, Fiyat: {item.TOPLAMFIYAT}");
-         }
+         var pdfBytes = await response.Content.ReadAsByteArrayAsync();
 
-         var contentBytes = Encoding.UTF8.GetBytes(sb.ToString());
-
-         var base64 = Convert.ToBase64String(contentBytes);
-
-         return Ok(new
-         {
-            success = true,
-            fileBase64 = base64,
-            fileName = "export.pdf" // Gerçek PDF olursa uzantı pdf olmalı
-         });
-      }
-
-      public class ExportPdfRequestDto
-      {
-         public InfoDto info { get; set; }
-         public List<OrderItemDto> offer_order_ItemsData { get; set; }
-         public object userInfo { get; set; }
-         public string lang { get; set; }
-      }
-
-      public class InfoDto
-      {
-         public string type { get; set; } // "offerItems" veya "orderItems"
-         public object offerData { get; set; }
-         public object orderData { get; set; }
+         return File(pdfBytes, "application/pdf", $"Irsaliye_{dto.DOCNUM}.pdf");
       }
 
    }
