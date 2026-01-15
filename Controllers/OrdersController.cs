@@ -47,7 +47,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
          var requestBody = new
          {
-            language = "T",
+            language = "tr",
             info = new
             {
                KPOCUSTOMER = kpocustomer,
@@ -76,7 +76,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
          {
             var itemsRequestBody = new
             {
-               language = "T",
+               language = "tr",
                info = new
                {
                   type = "orderItems",
