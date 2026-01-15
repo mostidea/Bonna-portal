@@ -161,7 +161,7 @@ namespace Bonna_Portal_Bridge_Api.Controllers
 
          var requestBody = new
          {
-            language = "T",
+            language = "tr",
             info = new
             {
                type = "orderItems",
