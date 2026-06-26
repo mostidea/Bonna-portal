@@ -1,5 +1,6 @@
 ﻿using Bonna_Portal_Bridge_Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System.Text;
@@ -22,10 +23,19 @@ namespace Bonna_Portal_Bridge_Api.Controllers
     }
 
     [HttpPost("Login")]
-    public async Task<IActionResult> Login([FromQuery] LoginRequestDto model)
+    public async Task<IActionResult> Login(
+      [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] LoginRequestDto? bodyModel,
+      [FromQuery] string? username,
+      [FromQuery] string? password)
     {
+      var resolvedUsername = bodyModel?.Username ?? username;
+      var resolvedPassword = bodyModel?.Password ?? password;
+
+      if (string.IsNullOrWhiteSpace(resolvedUsername) || string.IsNullOrWhiteSpace(resolvedPassword))
+        return BadRequest("Kullanıcı adı ve şifre zorunludur.");
+
       var client = _HttpClientFactory.CreateClient();
-      var requestJson = JsonConvert.SerializeObject(new { username = model.Username, password = model.Password });
+      var requestJson = JsonConvert.SerializeObject(new { username = resolvedUsername, password = resolvedPassword });
       var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
 
       var response = await client.PostAsync($"{_BonnaApiBaseUrl}/api/auth/login", content);
